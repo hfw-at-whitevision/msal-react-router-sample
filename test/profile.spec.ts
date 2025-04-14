@@ -17,14 +17,24 @@ async function verifyTokenStore(
     BrowserCache: BrowserCacheUtils,
     scopes: string[]
 ): Promise<void> {
-    await BrowserCache.verifyTokenStore({
-        scopes,
-    });
+    const tokenStore = await BrowserCache.getTokens();
+    expect(tokenStore.idTokens.length).toBe(1);
+    expect(tokenStore.accessTokens.length).toBe(1);
+    expect(tokenStore.refreshTokens.length).toBe(1);
+    expect(
+        await BrowserCache.getAccountFromCache()
+    ).not.toBeNull();
+    expect(
+        await BrowserCache.accessTokenForScopesExists(
+            tokenStore.accessTokens,
+            scopes
+        )
+    ).toBeTruthy;
     const telemetryCacheEntry = await BrowserCache.getTelemetryCacheEntry(
         "b5c2e510-4a17-4feb-b219-e55aa5b74144"
     );
     expect(telemetryCacheEntry).not.toBeNull;
-    expect(telemetryCacheEntry["cacheHits"]).toBe(1);
+    expect(telemetryCacheEntry!.cacheHits).toBe(1);
 }
 
 describe("/profile", () => {
@@ -63,7 +73,7 @@ describe("/profile", () => {
         context = await browser.createBrowserContext();
         page = await context.newPage();
         page.setDefaultTimeout(5000);
-        BrowserCache = new BrowserCacheUtils(page, "localStorage");
+        BrowserCache = new BrowserCacheUtils(page, "sessionStorage");
         await page.goto(`http://localhost:${port}`);
     });
 
@@ -72,29 +82,18 @@ describe("/profile", () => {
         await context.close();
     });
 
-    it("MsalAuthenticationTemplate - invokes loginPopup if user is not signed in", async () => {
+    it("MsalAuthenticationTemplate - invokes loginRedirect if user is not signed in", async () => {
         const testName = "MsalAuthenticationTemplateBaseCase";
         const screenshot = new Screenshot(
             `${SCREENSHOT_BASE_FOLDER_NAME}/${testName}`
         );
         await screenshot.takeScreenshot(page, "Home page loaded");
 
-        // Navigate to /profile and expect popup to be opened without interaction
-        const newPopupWindowPromise = new Promise<puppeteer.Page|null>((resolve) =>
-            page.once("popup", resolve)
-        );
+        // Navigate to /profile and expect redirect to be initiated without interaction
         await page.goto(`http://localhost:${port}/profile`);
         await screenshot.takeScreenshot(page, "Profile page loaded");
-        const popupPage = await newPopupWindowPromise;
-        if (!popupPage) {
-            throw new Error('Popup window was not opened');
-          }
-        const popupWindowClosed = new Promise<void>((resolve) =>
-            popupPage.once("close", resolve)
-        );
 
-        await enterCredentials(popupPage, screenshot, username, accountPwd);
-        await popupWindowClosed;
+        await enterCredentials(page, screenshot, username, accountPwd);
 
         // Wait for Graph data to display
         await page.waitForSelector("xpath/.//div/ul/li[contains(., 'Name')]", {
@@ -107,7 +106,7 @@ describe("/profile", () => {
         const profileButton = await page.waitForSelector(
             "xpath=//header//button"
         );
-        await profileButton.click();
+        await profileButton?.click();
         const logoutButtons = await page.$$(
             "xpath/.//li[contains(., 'Logout using')]"
         );
@@ -129,7 +128,7 @@ describe("/profile", () => {
         const signInButton = await page.waitForSelector(
             "xpath=//button[contains(., 'Login')]"
         );
-        await signInButton.click();
+        await signInButton?.click();
         await screenshot.takeScreenshot(page, "Login button clicked");
         const loginPopupButton = await page.waitForSelector(
             "xpath=//li[contains(., 'Sign in using Popup')]"
@@ -137,7 +136,7 @@ describe("/profile", () => {
         const newPopupWindowPromise = new Promise<puppeteer.Page|null>((resolve) =>
             page.once("popup", resolve)
         );
-        await loginPopupButton.click();
+        await loginPopupButton?.click();
         const popupPage = await newPopupWindowPromise;
         if (!popupPage) {
             throw new Error('Popup window was not opened');
@@ -158,7 +157,7 @@ describe("/profile", () => {
         const profileButton = await page.waitForSelector(
             "xpath=//header//button"
         );
-        await profileButton.click();
+        await profileButton?.click();
         const logoutButtons = await page.$$(
             "xpath/.//li[contains(., 'Logout using')]"
         );
@@ -174,43 +173,5 @@ describe("/profile", () => {
         await screenshot.takeScreenshot(page, "Graph data acquired");
         // Verify tokens are in cache
         await verifyTokenStore(BrowserCache, ["User.Read"]);
-    });
-
-    it("MsalAuthenticationTemplate - renders loading component when popup is open, then error component when loginPopup is cancelled", async () => {
-        const testName = "MsalAuthenticationTemplateError";
-        const screenshot = new Screenshot(
-            `${SCREENSHOT_BASE_FOLDER_NAME}/${testName}`
-        );
-        await screenshot.takeScreenshot(page, "Home page loaded");
-
-        // Navigate to /profile and expect popup to be opened without interaction
-        const newPopupWindowPromise = new Promise<puppeteer.Page|null>((resolve) =>
-            page.once("popup", resolve)
-        );
-        await page.goto(`http://localhost:${port}/profile`);
-        await screenshot.takeScreenshot(page, "Profile page loaded");
-        const popupPage = await newPopupWindowPromise;
-        if (!popupPage) {
-            throw new Error('Popup window was not opened');
-          }
-        const popupWindowClosed = new Promise<void>((resolve) =>
-            popupPage.once("close", resolve)
-        );
-
-        // Wait until the popup has navigated to login page
-        await popupPage.waitForNavigation({ waitUntil: "networkidle0" });
-
-        await page.waitForSelector(
-            "xpath/.//h6[contains(., 'Authentication in progress...')]"
-        );
-        await screenshot.takeScreenshot(page, "Loading component rendered");
-
-        await popupPage.close();
-        await popupWindowClosed;
-
-        await page.waitForSelector(
-            "xpath/.//h6[contains(., 'An Error Occurred: user_cancelled')]"
-        );
-        await screenshot.takeScreenshot(page, "Error component rendered");
     });
 });

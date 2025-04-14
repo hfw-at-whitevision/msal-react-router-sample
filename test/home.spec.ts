@@ -49,7 +49,7 @@ describe("/ (Home Page)", () => {
         context = await browser.createBrowserContext();
         page = await context.newPage();
         page.setDefaultTimeout(5000);
-        BrowserCache = new BrowserCacheUtils(page, "localStorage");
+        BrowserCache = new BrowserCacheUtils(page, "sessionStorage");
         await page.goto(`http://localhost:${port}`);
     });
 
@@ -69,12 +69,12 @@ describe("/ (Home Page)", () => {
         const signInButton = await page.waitForSelector(
             "xpath=//button[contains(., 'Login')]"
         );
-        await signInButton.click();
+        await signInButton?.click();
         await screenshot.takeScreenshot(page, "Login button clicked");
         const loginRedirectButton = await page.waitForSelector(
             "xpath=//li[contains(., 'Sign in using Redirect')]"
         );
-        await loginRedirectButton.click();
+        await loginRedirectButton?.click();
 
         await enterCredentials(page, screenshot, username, accountPwd);
         await screenshot.takeScreenshot(page, "Returned to app");
@@ -84,7 +84,7 @@ describe("/ (Home Page)", () => {
         const profileButton = await page.waitForSelector(
             "xpath=//header//button"
         );
-        await profileButton.click();
+        await profileButton?.click();
         const logoutButtons = await page.$$(
             "xpath/.//li[contains(., 'Logout using')]"
         );
@@ -108,7 +108,7 @@ describe("/ (Home Page)", () => {
         const signInButton = await page.waitForSelector(
             "xpath=//button[contains(., 'Login')]"
         );
-        await signInButton.click();
+        await signInButton?.click();
         await screenshot.takeScreenshot(page, "Login button clicked");
         const loginPopupButton = await page.waitForSelector(
             "xpath=//li[contains(., 'Sign in using Popup')]"
@@ -116,7 +116,7 @@ describe("/ (Home Page)", () => {
         const newPopupWindowPromise = new Promise<puppeteer.Page|null>((resolve) =>
             page.once("popup", resolve)
         );
-        await loginPopupButton.click();
+        await loginPopupButton?.click();
         const popupPage = await newPopupWindowPromise;
         if (!popupPage) {
             throw new Error('Popup window was not opened');
@@ -137,7 +137,7 @@ describe("/ (Home Page)", () => {
         const profileButton = await page.waitForSelector(
             "xpath=//header//button"
         );
-        await profileButton.click();
+        await profileButton?.click();
         const logoutButtons = await page.$$(
             "xpath/.//li[contains(., 'Logout using')]"
         );

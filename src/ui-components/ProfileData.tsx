@@ -1,4 +1,3 @@
-import React from "react";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -10,7 +9,15 @@ import MailIcon from '@mui/icons-material/Mail';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 
-export const ProfileData = ({graphData}) => {
+export type GraphData = {
+    displayName: string,
+    jobTitle: string,
+    mail: string,
+    businessPhones: string[],
+    officeLocation: string
+};
+
+export const ProfileData: React.FC<{graphData: GraphData}> = ({graphData}) => {
     return (
         <List className="profileData">
             <NameListItem name={graphData.displayName} />
@@ -22,7 +29,7 @@ export const ProfileData = ({graphData}) => {
     );
 };
 
-const NameListItem = ({name}) => (
+const NameListItem: React.FC<{name: string}> = ({name}) => (
     <ListItem>
         <ListItemAvatar>
             <Avatar>
@@ -33,7 +40,7 @@ const NameListItem = ({name}) => (
     </ListItem>
 );
 
-const JobTitleListItem = ({jobTitle}) => (
+const JobTitleListItem: React.FC<{jobTitle: string}> = ({jobTitle}) => (
     <ListItem>
         <ListItemAvatar>
             <Avatar>
@@ -44,7 +51,7 @@ const JobTitleListItem = ({jobTitle}) => (
     </ListItem>
 );
 
-const MailListItem = ({mail}) => (
+const MailListItem: React.FC<{mail: string}> = ({mail}) => (
     <ListItem>
         <ListItemAvatar>
             <Avatar>
@@ -55,7 +62,7 @@ const MailListItem = ({mail}) => (
     </ListItem>
 );
 
-const PhoneListItem = ({phone}) => (
+const PhoneListItem: React.FC<{phone: string}> = ({phone}) => (
     <ListItem>
         <ListItemAvatar>
             <Avatar>
@@ -66,7 +73,7 @@ const PhoneListItem = ({phone}) => (
     </ListItem>
 );
 
-const LocationListItem = ({location}) => (
+const LocationListItem: React.FC<{location: string}> = ({location}) => (
     <ListItem>
         <ListItemAvatar>
             <Avatar>

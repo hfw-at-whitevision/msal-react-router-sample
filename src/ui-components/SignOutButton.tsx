@@ -4,33 +4,24 @@ import IconButton from '@mui/material/IconButton';
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
-import { AccountPicker } from "./AccountPicker";
 
 export const SignOutButton = () => {
     const { instance } = useMsal();
-    const [accountSelectorOpen, setOpen] = useState(false);
 
-    const [anchorEl, setAnchorEl] = useState(null);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
-    const handleLogout = (logoutType) => {
+    const handleLogout = (logoutType: string) => {
         setAnchorEl(null);
 
         if (logoutType === "popup") {
-            instance.logoutPopup();
+            instance.logoutPopup({
+                mainWindowRedirectUri: "/"
+            });
         } else if (logoutType === "redirect") {
             instance.logoutRedirect();
         }
     }
-
-    const handleAccountSelection = () => {
-        setAnchorEl(null);
-        setOpen(true);
-    }
-
-    const handleClose = () => {
-        setOpen(false);
-    };
 
     return (
         <div>
@@ -55,11 +46,9 @@ export const SignOutButton = () => {
                 open={open}
                 onClose={() => setAnchorEl(null)}
             >
-                <MenuItem onClick={() => handleAccountSelection()} key="switchAccount">Switch Account</MenuItem>
                 <MenuItem onClick={() => handleLogout("popup")} key="logoutPopup">Logout using Popup</MenuItem>
                 <MenuItem onClick={() => handleLogout("redirect")} key="logoutRedirect">Logout using Redirect</MenuItem>
             </Menu>
-            <AccountPicker open={accountSelectorOpen} onClose={handleClose} />
         </div>
     )
 };

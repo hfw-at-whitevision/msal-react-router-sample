@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
-import { useMsal } from "@azure/msal-react";
+import { useMsal, useAccount } from "@azure/msal-react";
 import Typography from "@mui/material/Typography";
 
 const WelcomeName = () => {
-    const { instance } = useMsal();
-    const [name, setName] = useState(null);
+    const { accounts } = useMsal();
+    const account = useAccount(accounts[0] || {});
+    const [name, setName] = useState("");
 
-    const activeAccount = instance.getActiveAccount();
     useEffect(() => {
-        if (activeAccount) {
-            setName(activeAccount.name.split(' ')[0]);
+        if (account && account.name) {
+            setName(account.name.split(" ")[0]);
         } else {
-            setName(null);
+            setName("");
         }
-    }, [activeAccount]);
+    }, [account]);
 
     if (name) {
         return <Typography variant="h6">Welcome, {name}</Typography>;
