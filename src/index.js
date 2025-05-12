@@ -1,15 +1,57 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter as Router } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import { theme } from "./styles/theme";
 import App from './App';
+
+// Pages
+import { Home } from "./pages/Home";
+import { Profile } from "./pages/Profile";
+import { ProfileWithMsal } from "./pages/ProfileWithMsal";
+import { ProfileRawContext } from "./pages/ProfileRawContext";
+import { ProfileUseMsalAuthenticationHook } from "./pages/ProfileUseMsalAuthenticationHook";
+import { Logout } from "./pages/Logout";
 
 // MSAL imports
 import { PublicClientApplication, EventType } from "@azure/msal-browser";
 import { msalConfig } from "./authConfig";
 
 export const msalInstance = new PublicClientApplication(msalConfig);
+
+// Create the router with routes configuration
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App pca={msalInstance} />,
+    children: [
+      {
+        index: true,
+        element: <Home />
+      },
+      {
+        path: "profile",
+        element: <Profile />
+      },
+      {
+        path: "profileWithMsal",
+        element: <ProfileWithMsal />
+      },
+      {
+        path: "profileRawContext",
+        element: <ProfileRawContext />
+      },
+      {
+        path: "profileUseMsalAuthenticationHook",
+        element: <ProfileUseMsalAuthenticationHook />
+      },
+      {
+        path: "logout",
+        element: <Logout />
+      }
+    ]
+  }
+]);
 
 msalInstance.initialize().then(() => {
   // Default to using the first account if no account is active on page load
@@ -32,10 +74,8 @@ msalInstance.initialize().then(() => {
   const root = ReactDOM.createRoot(container);
 
   root.render(
-    <Router>
-      <ThemeProvider theme={theme}>
-        <App pca={msalInstance} />
-      </ThemeProvider>
-    </Router>
+    <ThemeProvider theme={theme}>
+      <RouterProvider router={router} />
+    </ThemeProvider>
   );
 });
