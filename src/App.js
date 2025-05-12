@@ -1,4 +1,4 @@
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 // Material-UI imports
 import Grid from "@mui/material/Grid";
 
@@ -27,26 +27,10 @@ function App({ pca }) {
         <MsalProvider instance={pca}>
             <PageLayout>
                 <Grid container justifyContent="center">
-                    <Pages />
+                    <Outlet />
                 </Grid>
             </PageLayout>
         </MsalProvider>
-    );
-}
-
-function Pages() {
-    return (
-        <Routes>
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/profileWithMsal" element={<ProfileWithMsal />} />
-            <Route path="/profileRawContext" element={<ProfileRawContext />} />
-            <Route
-                path="/profileUseMsalAuthenticationHook"
-                element={<ProfileUseMsalAuthenticationHook />}
-            />
-            <Route path="/logout" element={<Logout />} />
-            <Route path="/" element={<Home />} />
-        </Routes>
     );
 }
 
