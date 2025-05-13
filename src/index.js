@@ -1,8 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { ThemeProvider } from "@mui/material/styles";
-import { theme } from "./styles/theme";
 import App from './App';
 
 // Pages
@@ -74,8 +72,6 @@ msalInstance.initialize().then(() => {
   const root = ReactDOM.createRoot(container);
 
   root.render(
-    <ThemeProvider theme={theme}>
       <RouterProvider router={router} />
-    </ThemeProvider>
   );
 });

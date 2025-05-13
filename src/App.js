@@ -8,6 +8,8 @@ import { CustomNavigationClient } from "./utils/NavigationClient";
 
 // Sample app imports
 import { PageLayout } from "./ui-components/PageLayout";
+import { ThemeProvider } from "@mui/material/styles";
+import { theme } from "./styles/theme";
 
 function App({ pca }) {
     // The next 3 lines are optional. This is how you configure MSAL to take advantage of the router's navigate functions when MSAL redirects between pages in your app
@@ -17,11 +19,13 @@ function App({ pca }) {
 
     return (
         <MsalProvider instance={pca}>
-            <PageLayout>
-                <Grid container justifyContent="center">
-                    <Outlet />
-                </Grid>
-            </PageLayout>
+            <ThemeProvider theme={theme}>
+                <PageLayout>
+                    <Grid container justifyContent="center">
+                        <Outlet />
+                    </Grid>
+                </PageLayout>
+            </ThemeProvider>
         </MsalProvider>
     );
 }
